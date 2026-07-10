@@ -1,23 +1,51 @@
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
+"use client";
+
+import dynamic from "next/dynamic";
+
+const CardNav = dynamic(() => import("@/components/card-nav/CardNav"), {
+  ssr: false,
+});
+
+const navItems = [
+  {
+    label: "产品",
+    bgColor: "#1B1722",
+    textColor: "#fff",
+    links: [
+      { label: "Koring Launcher", href: "/launcher", ariaLabel: "Koring Launcher" },
+      { label: "Sanshe Play", href: "https://docs.play.lenjing.work", ariaLabel: "Sanshe Play" },
+    ],
+  },
+  {
+    label: "资源",
+    bgColor: "#2F293A",
+    textColor: "#fff",
+    links: [
+      { label: "Github", href: "https://github.com/lingke-net", ariaLabel: "Github" },
+      { label: "支持", href: "https://support.lingke.ink", ariaLabel: "支持" },
+    ],
+  },
+  {
+    label: "关于",
+    bgColor: "#2F293A",
+    textColor: "#fff",
+    links: [
+      { label: "MChine Space", href: "https://mchine.space", ariaLabel: "MChine Space" },
+    ],
+  },
+];
 
 function Header() {
   return (
-    <div className="fixed w-full backdrop-blur-sm bg-background/70 p-3 px-4 md:px-10 lg:px-48 flex items-center justify-between z-20">
-      <Link href="/">
-        <Button className="font-bold" variant="ghost">
-          Koring Team Space
-        </Button>
-      </Link>
-      <div className="flex items-center gap-1">
-        <a href="https://support.lingke.ink">
-          <Button variant="ghost">支持</Button>
-        </a>
-        <a href="https://learn.rivfox.com">
-          <Button variant="ghost">文档</Button>
-        </a>
-      </div>
-    </div>
+    <CardNav
+      logoAlt="Koring Team"
+      items={navItems}
+      baseColor="#ffffff"
+      menuColor="#000"
+      buttonBgColor="#111"
+      buttonTextColor="#fff"
+      ease="power3.out"
+    />
   );
 }
 

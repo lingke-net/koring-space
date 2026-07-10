@@ -30,34 +30,24 @@ export default function HomePage() {
           </div>
         </div>
 
-        <div className="relative w-full h-120 overflow-hidden">
-          <div className="relative rounded-xl border w-full h-full">
-            <div className="absolute inset-0 z-10 flex items-center justify-center">
-              <img
-                src="/koring-big-w-blue.svg"
-                alt="Koring Team"
-                className="w-[5%] h-1"
-              />
-            </div>
-
-            <span className="absolute right-12 bottom-12 text-xl text-muted-foreground">
-
-            </span>
-
-            <FlickeringGrid
-              className="absolute inset-0 z-0 mask-[radial-gradient(700px_circle_at_center,white,transparent)]"
-              squareSize={6}
-              gridGap={14}
-              color="#6b9eb6"
-              maxOpacity={0.7}
-              flickerChance={0.1}
-            />
+        <div className="relative w-full" style={{ height: "75vh" }}>
+          <FlickeringGrid
+            className="absolute inset-0 z-0 mask-[radial-gradient(700px_circle_at_center,white,transparent)]"
+            squareSize={6}
+            gridGap={14}
+            color="#6b9eb6"
+            maxOpacity={0.7}
+            flickerChance={0.1}
+          />
+          <div className="relative z-10 flex flex-col items-center justify-center h-full gap-2">
+            <span className="font-bold text-5xl">Koring Team</span>
+            <span className="text-xl text-muted-foreground">创意无限</span>
           </div>
         </div>
 
         <Link
           href="/launcher"
-          className="relative flex w-full flex-col overflow-hidden rounded-md border p-6 group dark text-white bg-[#0A0A0AFF]"
+          className="relative flex w-full flex-col overflow-hidden rounded-md border p-4 sm:p-6 group dark text-white bg-[#0A0A0AFF]"
         >
           <div className="flex items-center justify-between gap-4">
             要不来尝尝鲜？试试这个...
@@ -90,7 +80,7 @@ export default function HomePage() {
           <a
             href="https://docs.play.lenjing.work"
             target="_blank"
-            className="group rounded-md border border-border p-6"
+            className="group rounded-md border border-border p-4 sm:p-6"
           >
             <div className="flex items-center justify-between gap-4">
               <b>散射系列</b>
@@ -104,7 +94,7 @@ export default function HomePage() {
 
           <a
             href="/launcher"
-            className="group rounded-md border border-border p-6"
+            className="group rounded-md border border-border p-4 sm:p-6"
           >
             <div className="flex items-center justify-between gap-4">
               <b>科灵启动器</b>
@@ -120,7 +110,7 @@ export default function HomePage() {
             </div>
           </a>
 
-          <a className="group rounded-md border border-border p-6">
+          <a className="group rounded-md border border-border p-4 sm:p-6">
             <div className="flex items-center justify-between gap-4">
               <b>绘皮编辑器</b>
               <Status status="degraded">
@@ -135,7 +125,7 @@ export default function HomePage() {
             </div>
           </a>
 
-          <a className="group rounded-md border border-border p-6">
+          <a className="group rounded-md border border-border p-4 sm:p-6">
             <div className="flex items-center justify-between gap-4">
               <b>绘皮编辑器</b>
               <Status status="degraded">
@@ -150,7 +140,7 @@ export default function HomePage() {
             </div>
           </a>
 
-          <a className="group rounded-md border border-border p-6">
+          <a className="group rounded-md border border-border p-4 sm:p-6">
             <div className="flex items-center justify-between gap-4">
               <b>创汇基金</b>
               <Status status="degraded">
@@ -168,7 +158,7 @@ export default function HomePage() {
           <a
             href="https://mchine.space"
             target="_blank"
-            className="group rounded-md border border-border p-6"
+            className="group rounded-md border border-border p-4 sm:p-6"
           >
             <div className="flex items-center justify-between gap-4">
               <b>木柴.空间</b>
