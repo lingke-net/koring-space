@@ -32,20 +32,20 @@ export default function HomePage() {
 
         <div className="relative w-full h-120 overflow-hidden">
           <div className="relative rounded-xl border w-full h-full">
-            <div className="absolute left-12 top-12 flex flex-col gap-2">
-              <span className="font-bold text-5xl">Koring Team</span>
-              <span className="text-xl">创意无限</span>
+            <div className="absolute inset-0 z-10 flex items-center justify-center">
+              <img
+                src="/koring-big-w-blue.svg"
+                alt="Koring Team"
+                className="w-[5%] h-1"
+              />
             </div>
 
             <span className="absolute right-12 bottom-12 text-xl text-muted-foreground">
-              与光年相遇，见宇宙未开源的无限
-              <span className="text-sm">
-                <br /> 以星辰为数据，用仰望作读取
-              </span>
+
             </span>
 
             <FlickeringGrid
-              className="relative inset-0 z-0 mask-[radial-gradient(700px_circle_at_center,white,transparent)]"
+              className="absolute inset-0 z-0 mask-[radial-gradient(700px_circle_at_center,white,transparent)]"
               squareSize={6}
               gridGap={14}
               color="#6b9eb6"
