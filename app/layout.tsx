@@ -40,7 +40,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         <Providers>
         <Header />
-        <div style={{ height: 20 }} />
+        <div style={{ height: 90 }} />
         <main className="flex-1 px-4 sm:px-10 lg:px-48">
           {children}
           <Script
