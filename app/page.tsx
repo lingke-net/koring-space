@@ -112,16 +112,16 @@ export default function HomePage() {
 
           <a className="group rounded-md border border-border p-4 sm:p-6">
             <div className="flex items-center justify-between gap-4">
-              <b>绘皮编辑器</b>
+              <b>科灵界面</b>
               <Status status="degraded">
                 <StatusIndicator />
-                待开发
+                开发中
               </Status>
               {/*<ArrowUpRight className="size-4 -translate-x-2 translate-y-2 opacity-0 transition-all group-hover:translate-x-0 group-hover:translate-y-0 group-hover:opacity-100" />*/}
             </div>
             <div className="mt-4">
               <h3 className="mb-1 font-semibold">SkinEditer</h3>
-              <p className="text-sm text-muted-foreground">基于 Tauri 的 Minecraft 皮肤编辑器</p>
+              <p className="text-sm text-muted-foreground">基于 Next.js 的 UI 组件库</p>
             </div>
           </a>
 
