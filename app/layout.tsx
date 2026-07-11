@@ -7,6 +7,7 @@ import { Footer } from "@/layout/footer";
 import Script from "next/script";
 import { cn } from "@/lib/utils";
 import { Providers } from "./providers";
+import { PageTransition } from "@/components/page-transition";
 
 const alimamaFangYuan = localFont({
   src: "../public/font/Alimama.ttf",
@@ -42,7 +43,7 @@ export default function RootLayout({
         <Header />
         <div style={{ height: 90 }} />
         <main className="flex-1 px-4 sm:px-10 lg:px-48">
-          {children}
+          <PageTransition>{children}</PageTransition>
         </main>
         <div style={{ height: 50 }} />
         <Footer/>

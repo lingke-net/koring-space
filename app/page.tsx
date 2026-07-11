@@ -26,11 +26,11 @@ export default function HomePage() {
               <HammerIcon className="size-4" />
               <span className="text-[10px] font-black tracking-widest">正在接受测试</span>
             </div>
-            <p className="text-black font-bold text-sm tracking-tight">Koring Launcher UI 预览版本已发布</p>
+            <p className="text-black font-bold text-sm tracking-tight">Koring Launcher 预览版本已发布</p>
           </div>
         </div>
 
-        <div className="relative w-full" style={{ height: "75vh" }}>
+        <div className="relative w-full" style={{ height: "60vh" }}>
           <FlickeringGrid
             className="absolute inset-0 z-0 mask-[radial-gradient(700px_circle_at_center,white,transparent)]"
             squareSize={6}
@@ -39,9 +39,9 @@ export default function HomePage() {
             maxOpacity={0.7}
             flickerChance={0.1}
           />
-          <div className="relative z-10 flex flex-col items-center justify-center h-full gap-2">
-            <span className="font-bold text-5xl">Koring Team</span>
-            <span className="text-xl text-muted-foreground">创意无限</span>
+          <div className="relative z-10 flex flex-col items-center justify-center h-full gap-6 px-4">
+            <span className="font-bold text-5xl md:text-6xl tracking-tight">Koring Team</span>
+            <span className="text-xl md:text-2xl text-muted-foreground">创意无限</span>
           </div>
         </div>
 
@@ -93,7 +93,6 @@ export default function HomePage() {
           </a>
 
           <a
-            href="/launcher"
             className="group rounded-md border border-border p-4 sm:p-6"
           >
             <div className="flex items-center justify-between gap-4">

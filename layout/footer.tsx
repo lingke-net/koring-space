@@ -17,7 +17,7 @@ function Footer() {
         Koring Team 是 Lingke Network 旗下 Prism Horizon 独立运营的创意化工作室
       </div>
       <div style={{ height: 20 }} />
-      <div className="py-8 px-4 border-t">
+      <div className="py-8 px-1">
         <div className="mx-0 md:mx-6 lg:mx-44 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 md:gap-4">
         <Link href="/">
           <Button className="font-bold text-sm md:text-base" variant="ghost">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useLayoutEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { gsap } from "gsap";
 import { GoArrowUpRight } from "react-icons/go";
 import { useTheme } from "next-themes";
@@ -206,13 +207,13 @@ const CardNav: React.FC<CardNavProps> = ({
           </div>
 
           <div className="logo-container">
-            <a href="/" className="no-underline">
+            <Link href="/" className="no-underline">
               {logo ? (
                 <img src={logo} alt={logoAlt} className="logo" />
               ) : (
                 <span className="logo-text" style={{ cursor: "pointer" }}>{logoAlt}</span>
               )}
-            </a>
+            </Link>
           </div>
 
           <div className="flex items-center gap-2">
@@ -255,17 +256,29 @@ const CardNav: React.FC<CardNavProps> = ({
             >
               <div className="nav-card-label">{item.label}</div>
               <div className="nav-card-links">
-                {item.links?.map((lnk, i) => (
-                  <a
-                    key={`${lnk.label}-${i}`}
-                    className="nav-card-link"
-                    href={lnk.href}
-                    aria-label={lnk.ariaLabel}
-                  >
-                    <GoArrowUpRight className="nav-card-link-icon" aria-hidden="true" />
-                    {lnk.label}
-                  </a>
-                ))}
+                {item.links?.map((lnk, i) =>
+                  lnk.href?.startsWith("/") ? (
+                    <Link
+                      key={`${lnk.label}-${i}`}
+                      className="nav-card-link"
+                      href={lnk.href}
+                      aria-label={lnk.ariaLabel}
+                    >
+                      <GoArrowUpRight className="nav-card-link-icon" aria-hidden="true" />
+                      {lnk.label}
+                    </Link>
+                  ) : (
+                    <a
+                      key={`${lnk.label}-${i}`}
+                      className="nav-card-link"
+                      href={lnk.href}
+                      aria-label={lnk.ariaLabel}
+                    >
+                      <GoArrowUpRight className="nav-card-link-icon" aria-hidden="true" />
+                      {lnk.label}
+                    </a>
+                  )
+                )}
               </div>
             </div>
           ))}
