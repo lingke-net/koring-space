@@ -3,19 +3,15 @@
 @import "shadcn/tailwind.css";
 
 /* Hide scrollbar */
-html {
-  overflow: hidden;
-  height: 100%;
-}
-body {
-  overflow-y: auto;
-  height: 100%;
+* {
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
-body::-webkit-scrollbar {
+*::-webkit-scrollbar {
   display: none;
   width: 0;
+  height: 0;
+  background: transparent;
 }
 
 @custom-variant dark (&:is(.dark *));
