@@ -19,11 +19,20 @@ import {
   AlertCircle,
   Package,
   Hash,
+  Calendar,
+  GitBranch,
+  PackageOpen,
   ArrowUpRight,
   FileText,
   Download,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { MarkdownLite } from "@/components/markdown-lite";
+import {
+  DOWNLOAD_SOURCES,
+  resolveDownloadUrl,
+  type DownloadSourceKey,
+} from "@/lib/download-sources";
 
 interface License {
   isNeedAgreat: string;
@@ -46,12 +55,19 @@ interface AboutVersion {
 interface BetaData {
   version: string;
   builddate: string;
+  /** 数据来源：github = GitHub Releases 自动识别；legacy = 旧静态源兜底 */
+  source?: "github" | "legacy";
+  tag?: string;
+  htmlUrl?: string;
+  releaseNotes?: string;
+  /** GitHub 可达但没有预览版时的标记 */
+  noRelease?: boolean;
   app: {
     windows: PlatformInfo;
     macos: PlatformInfo;
     linux: PlatformInfo;
   };
-  aboutversion: AboutVersion;
+  aboutversion?: AboutVersion;
 }
 
 const platforms = [
@@ -66,6 +82,7 @@ export default function JoinBetaPage() {
   const [error, setError] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [activePlatform, setActivePlatform] = useState<PlatformInfo | null>(null);
+  const [downloadSource, setDownloadSource] = useState<DownloadSourceKey>("github");
 
   useEffect(() => {
     fetch("/api/beta-version")
@@ -88,13 +105,19 @@ export default function JoinBetaPage() {
       setActivePlatform(platform);
       setDialogOpen(true);
     } else {
-      window.open(platform.DownlodeURL, "_blank");
+      window.open(
+        resolveDownloadUrl(downloadSource, platform.DownlodeURL),
+        "_blank"
+      );
     }
   };
 
   const confirmDownload = () => {
     if (activePlatform?.DownlodeURL) {
-      window.open(activePlatform.DownlodeURL, "_blank");
+      window.open(
+        resolveDownloadUrl(downloadSource, activePlatform.DownlodeURL),
+        "_blank"
+      );
     }
     setDialogOpen(false);
     setActivePlatform(null);
@@ -121,6 +144,30 @@ export default function JoinBetaPage() {
     );
   }
 
+  if (data.noRelease) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 text-center px-4">
+        <PackageOpen className="size-10 text-muted-foreground" />
+        <div>
+          <p className="font-semibold text-lg">暂无预览版本</p>
+          <p className="text-sm text-muted-foreground max-w-sm mt-1">
+            GitHub Releases 中暂时没有可用的预览（Beta）版本，请稍后再来看看
+          </p>
+        </div>
+        <a
+          href="https://github.com/dream-pep/koring-launcher/releases"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <Button variant="outline">
+            前往 GitHub Releases
+            <ArrowUpRight className="size-4" />
+          </Button>
+        </a>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col w-full h-full gap-10 pb-24">
       {/* Header */}
@@ -134,6 +181,32 @@ export default function JoinBetaPage() {
         <p className="text-muted-foreground text-base md:text-lg max-w-xl">
           参与 Koring Launcher 的 Beta 测试计划，抢先体验最新功能
         </p>
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+          {data.source === "github" ? (
+            <>
+              <span className="flex items-center gap-1">
+                <GitBranch className="size-3" />
+                版本信息由 GitHub Releases 自动识别
+              </span>
+              {data.htmlUrl && (
+                <a
+                  href={data.htmlUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1 text-primary underline underline-offset-3 hover:text-primary/80"
+                >
+                  在 GitHub 查看发布页
+                  <ArrowUpRight className="size-3" />
+                </a>
+              )}
+            </>
+          ) : (
+            <span className="flex items-center gap-1">
+              <GitBranch className="size-3" />
+              版本信息来自缓存数据源
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Version Info Card */}
@@ -149,18 +222,53 @@ export default function JoinBetaPage() {
         </div>
         <div className="flex items-center gap-3">
           <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-primary/10">
-            <Hash className="size-5 text-primary" />
+            {data.source === "github" ? (
+              <Calendar className="size-5 text-primary" />
+            ) : (
+              <Hash className="size-5 text-primary" />
+            )}
           </div>
           <div>
-            <p className="text-xs text-muted-foreground">编译号</p>
-            <p className="font-semibold text-lg">{data.builddate}</p>
+            <p className="text-xs text-muted-foreground">
+              {data.source === "github" ? "发布时间" : "编译号"}
+            </p>
+            <p className="font-semibold text-lg">
+              {data.source === "github"
+                ? data.builddate
+                  ? new Date(data.builddate).toLocaleDateString("zh-CN")
+                  : "未知"
+                : data.builddate}
+            </p>
           </div>
         </div>
       </div>
 
       {/* Platform Cards */}
       <div>
-        <h2 className="text-xl font-semibold mb-4">选择平台</h2>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+          <h2 className="text-xl font-semibold">选择平台</h2>
+          {data.source === "github" &&
+            platforms.some(({ key }) => !!data.app[key].DownlodeURL) && (
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-xs text-muted-foreground">下载源</span>
+                {DOWNLOAD_SOURCES.map((s) => (
+                  <button
+                    key={s.key}
+                    type="button"
+                    onClick={() => setDownloadSource(s.key)}
+                    className={cn(
+                      "rounded-full border px-3 py-1 text-xs transition-colors",
+                      downloadSource === s.key
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border text-muted-foreground hover:text-foreground"
+                    )}
+                  >
+                    {s.label}
+                  </button>
+                ))}
+              </div>
+            )}
+        </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {platforms.map(({ key, label, icon: Icon }) => {
             const platform = data.app[key];
@@ -211,25 +319,33 @@ export default function JoinBetaPage() {
         </div>
       </div>
 
-      {/* About This Version */}
+      {/* Release Notes / About This Version */}
       <div className="rounded-2xl border border-border/50 p-6 md:p-8 bg-background/60 backdrop-blur-xl">
         <div className="flex items-center gap-2 mb-4">
           <FileText className="size-5 text-primary" />
-          <h2 className="text-xl font-semibold">关于此版本</h2>
+          <h2 className="text-xl font-semibold">
+            {data.releaseNotes ? "版本更新内容" : "关于此版本"}
+          </h2>
         </div>
-        <p className="text-muted-foreground leading-relaxed mb-4">
-          {data.aboutversion.about}
-        </p>
-        <ul className="flex flex-col gap-2">
-          {Object.entries(data.aboutversion["about-list"]).map(
-            ([key, text]) => (
-              <li key={key} className="flex items-start gap-2 text-sm">
-                <span className="mt-1.5 size-1.5 rounded-full bg-primary shrink-0" />
-                <span className="text-muted-foreground">{text}</span>
-              </li>
-            )
-          )}
-        </ul>
+        {data.releaseNotes ? (
+          <MarkdownLite text={data.releaseNotes} />
+        ) : data.aboutversion ? (
+          <>
+            <p className="text-muted-foreground leading-relaxed mb-4">
+              {data.aboutversion.about}
+            </p>
+            <ul className="flex flex-col gap-2">
+              {Object.entries(data.aboutversion["about-list"]).map(
+                ([key, text]) => (
+                  <li key={key} className="flex items-start gap-2 text-sm">
+                    <span className="mt-1.5 size-1.5 rounded-full bg-primary shrink-0" />
+                    <span className="text-muted-foreground">{text}</span>
+                  </li>
+                )
+              )}
+            </ul>
+          </>
+        ) : null}
       </div>
 
       {/* License Dialog */}
