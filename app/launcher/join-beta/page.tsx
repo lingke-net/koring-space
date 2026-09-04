@@ -27,7 +27,7 @@ import {
   Download,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { MarkdownLite } from "@/components/markdown-lite";
+import { ReleaseNotes } from "@/components/release-notes";
 import {
   DOWNLOAD_SOURCES,
   resolveDownloadUrl,
@@ -328,7 +328,7 @@ export default function JoinBetaPage() {
           </h2>
         </div>
         {data.releaseNotes ? (
-          <MarkdownLite text={data.releaseNotes} />
+          <ReleaseNotes text={data.releaseNotes} />
         ) : data.aboutversion ? (
           <>
             <p className="text-muted-foreground leading-relaxed mb-4">

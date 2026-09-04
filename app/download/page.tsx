@@ -19,7 +19,7 @@ import {
   Inbox,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { MarkdownLite } from "@/components/markdown-lite";
+import { ReleaseNotes } from "@/components/release-notes";
 import {
   DOWNLOAD_SOURCES,
   resolveDownloadUrl,
@@ -319,9 +319,9 @@ export default function DownloadPage() {
           <div className="border-t border-border/50 p-6 md:p-8">
             <div className="flex items-center gap-2 mb-3">
               <FileText className="size-5 text-primary" />
-              <h3 className="text-lg font-semibold">版本更新内容</h3>
+              <h3 className="text-lg font-semibold">此版本的变更</h3>
             </div>
-            <MarkdownLite text={active.releaseNotes} />
+            <ReleaseNotes text={active.releaseNotes} />
           </div>
         )}
       </div>
