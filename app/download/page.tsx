@@ -1,16 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
-  Download,
   Package,
   Calendar,
   HardDrive,
   ShieldCheck,
-  Copy,
-  Check,
+  History,
+  Monitor,
+  Apple,
+  Terminal,
   Loader2,
   AlertCircle,
   ArrowUpRight,
@@ -20,6 +21,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ReleaseNotes } from "@/components/release-notes";
+import { PlatformDownloadGrid } from "@/components/platform-download-grid";
 import {
   DOWNLOAD_SOURCES,
   resolveDownloadUrl,
@@ -36,6 +38,7 @@ interface ChannelPlatform {
 interface ChannelData {
   version: string;
   tag?: string;
+  channel?: "stable" | "preview";
   releaseDate?: string;
   releaseNotes?: string;
   htmlUrl?: string;
@@ -48,6 +51,7 @@ interface DownloadData {
   source?: "github" | "legacy";
   stable: ChannelData | null;
   preview: ChannelData | null;
+  versions: ChannelData[];
 }
 
 const CHANNEL_META = [
@@ -55,11 +59,15 @@ const CHANNEL_META = [
   { key: "preview" as const, label: "预览版", desc: "抢先体验新功能，可能存在不稳定因素" },
 ];
 
+type Selection =
+  | { kind: "latest"; channel: "stable" | "preview" }
+  | { kind: "version"; version: string };
+
 export default function DownloadPage() {
   const [data, setData] = useState<DownloadData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [channel, setChannel] = useState<"stable" | "preview">("stable");
+  const [selection, setSelection] = useState<Selection | null>(null);
   const [downloadSource, setDownloadSource] =
     useState<DownloadSourceKey>("github");
   const [copied, setCopied] = useState(false);
@@ -80,22 +88,42 @@ export default function DownloadPage() {
       });
   }, []);
 
-  // 当前渠道：选中的不存在时自动回退到可用渠道
-  const activeKey =
-    data && data[channel] ? channel : data?.stable ? "stable" : "preview";
-  const active = data ? data[activeKey] : null;
-  const win = active?.windows || null;
+  // 汇总全部版本（最新渠道条目带 yml 数据，覆盖历史同名条目）
+  const allVersions = useMemo<ChannelData[]>(() => {
+    if (!data) return [];
+    const map = new Map<string, ChannelData>();
+    for (const v of data.versions || []) map.set(v.version, v);
+    if (data.stable) map.set(data.stable.version, data.stable);
+    if (data.preview) map.set(data.preview.version, data.preview);
+    return [...map.values()];
+  }, [data]);
+
+  // 默认选中：正式版（无则预览版）
+  const defaultLatestChannel: "stable" | "preview" =
+    data?.stable ? "stable" : "preview";
+  const effectiveSelection: Selection =
+    selection ?? { kind: "latest", channel: defaultLatestChannel };
+
+  const active = useMemo<ChannelData | null>(() => {
+    if (!data) return null;
+    if (effectiveSelection.kind === "version") {
+      return (
+        allVersions.find((v) => v.version === effectiveSelection.version) || null
+      );
+    }
+    return data[effectiveSelection.channel];
+  }, [data, effectiveSelection, allVersions]);
+
   const isGithub = data?.source === "github";
+  const win = active?.windows || null;
+  const hasAnyDownload = !!(
+    active && (active.windows?.url || active.macos?.url || active.linux?.url)
+  );
 
   const formatSize = (bytes?: number) =>
     bytes ? `${(bytes / 1024 / 1024).toFixed(1)} MB` : "未知";
   const formatDate = (d?: string) =>
     d ? new Date(d).toLocaleDateString("zh-CN") : "未知";
-
-  const handleDownload = () => {
-    if (!win?.url) return;
-    window.open(resolveDownloadUrl(downloadSource, win.url), "_blank");
-  };
 
   const copySha = async () => {
     if (!win?.sha512) return;
@@ -106,6 +134,11 @@ export default function DownloadPage() {
     } catch {
       // 剪贴板不可用时忽略
     }
+  };
+
+  const handlePlatformDownload = (url?: string | null) => {
+    if (!url) return;
+    window.open(resolveDownloadUrl(downloadSource, url), "_blank");
   };
 
   if (loading) {
@@ -153,7 +186,14 @@ export default function DownloadPage() {
     );
   }
 
-  const meta = CHANNEL_META.find((c) => c.key === activeKey)!;
+  const activeChannelLabel =
+    active.channel === "preview"
+      ? CHANNEL_META[1].label
+      : CHANNEL_META[0].label;
+  const activeIsLatest = effectiveSelection.kind === "latest";
+  const activeDesc = activeIsLatest
+    ? CHANNEL_META.find((c) => c.key === effectiveSelection.channel)?.desc
+    : "历史版本，安装包与更新内容保留展示";
 
   return (
     <div className="flex flex-col w-full h-full gap-10 pb-24">
@@ -177,32 +217,60 @@ export default function DownloadPage() {
         )}
       </div>
 
-      {/* 渠道切换 */}
-      <div className="flex flex-wrap items-center gap-2">
-        {CHANNEL_META.map((c) => {
-          const d = c.key === "stable" ? data.stable : data.preview;
-          return (
-            <button
-              key={c.key}
-              type="button"
-              disabled={!d}
-              onClick={() => setChannel(c.key)}
-              className={cn(
-                "rounded-lg border px-4 py-2 text-sm font-medium transition-colors",
-                activeKey === c.key
-                  ? "border-primary bg-primary/10 text-primary"
-                  : "border-border text-muted-foreground hover:text-foreground",
-                !d && "opacity-40 cursor-not-allowed"
-              )}
+      {/* 渠道切换 + 历史版本 */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-2">
+          {CHANNEL_META.map((c) => {
+            const d = c.key === "stable" ? data.stable : data.preview;
+            const isActive =
+              effectiveSelection.kind === "latest" &&
+              effectiveSelection.channel === c.key;
+            return (
+              <button
+                key={c.key}
+                type="button"
+                disabled={!d}
+                onClick={() => setSelection({ kind: "latest", channel: c.key })}
+                className={cn(
+                  "rounded-lg border px-4 py-2 text-sm font-medium transition-colors",
+                  isActive
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border text-muted-foreground hover:text-foreground",
+                  !d && "opacity-40 cursor-not-allowed"
+                )}
+              >
+                {c.label}
+                {d && (
+                  <span className="ml-1.5 text-xs opacity-70">· {d.version}</span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {allVersions.length > 0 && (
+          <label className="flex items-center gap-2 text-sm text-muted-foreground">
+            <History className="size-4 shrink-0" />
+            <span className="shrink-0">历史版本</span>
+            <select
+              value={active.version}
+              onChange={(e) => setSelection({ kind: "version", version: e.target.value })}
+              className="max-w-[16rem] rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-primary"
             >
-              {c.label}
-              {d && <span className="ml-1.5 text-xs opacity-70">· {d.version}</span>}
-            </button>
-          );
-        })}
+              {allVersions.map((v) => (
+                <option key={v.version} value={v.version}>
+                  {v.version}
+                  {v.channel === "preview" ? "（预览版）" : "（正式版）"}
+                  {" · "}
+                  {formatDate(v.releaseDate)}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
       </div>
 
-      {/* 渠道信息卡 */}
+      {/* 版本信息卡 */}
       <div className="rounded-2xl border border-border/50 bg-background/60 backdrop-blur-xl overflow-hidden">
         <div className="p-6 md:p-8">
           <div className="flex flex-wrap items-center justify-between gap-3">
@@ -215,10 +283,10 @@ export default function DownloadPage() {
                   <h2 className="text-2xl font-bold tracking-tight">
                     {active.version}
                   </h2>
-                  <Badge variant="outline">{meta.label}</Badge>
+                  <Badge variant="outline">{activeChannelLabel}</Badge>
                 </div>
                 <p className="text-sm text-muted-foreground mt-0.5">
-                  {meta.desc}
+                  {activeDesc}
                 </p>
               </div>
             </div>
@@ -249,75 +317,92 @@ export default function DownloadPage() {
             <div className="flex items-center gap-3 rounded-xl border border-border/50 p-3">
               <HardDrive className="size-5 text-primary shrink-0" />
               <div>
-                <p className="text-xs text-muted-foreground">文件大小</p>
+                <p className="text-xs text-muted-foreground">安装包大小</p>
                 <p className="font-semibold text-sm">{formatSize(win?.size)}</p>
               </div>
             </div>
             <button
               type="button"
               onClick={copySha}
-              title="点击复制 SHA512"
-              className="flex items-center gap-3 rounded-xl border border-border/50 p-3 text-left transition-colors hover:border-primary/50"
+              disabled={!win?.sha512}
+              title={win?.sha512 ? "点击复制 SHA512" : undefined}
+              className={cn(
+                "flex items-center gap-3 rounded-xl border border-border/50 p-3 text-left transition-colors",
+                win?.sha512 && "hover:border-primary/50"
+              )}
             >
               <ShieldCheck className="size-5 text-primary shrink-0" />
               <div className="min-w-0">
                 <p className="text-xs text-muted-foreground">
-                  SHA512{copied ? "（已复制）" : "（点击复制）"}
+                  SHA512{win?.sha512 && (copied ? "（已复制）" : "（点击复制）")}
                 </p>
                 <p className="font-mono text-xs text-muted-foreground truncate">
-                  {win?.sha512 || "未知"}
+                  {win?.sha512 || "未提供"}
                 </p>
               </div>
             </button>
           </div>
 
-          {/* 下载区 */}
-          {win ? (
-            <div className="mt-6 flex flex-col gap-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-xs text-muted-foreground">下载源</span>
-                  {DOWNLOAD_SOURCES.map((s) => (
-                    <button
-                      key={s.key}
-                      type="button"
-                      onClick={() => setDownloadSource(s.key)}
-                      className={cn(
-                        "rounded-full border px-3 py-1 text-xs transition-colors",
-                        downloadSource === s.key
-                          ? "border-primary bg-primary/10 text-primary"
-                          : "border-border text-muted-foreground hover:text-foreground"
-                      )}
-                    >
-                      {s.label}
-                    </button>
-                  ))}
-                </div>
-                <span className="text-xs text-muted-foreground">
-                  {win.name}
-                </span>
-              </div>
-              <Button size="lg" onClick={handleDownload}>
-                <Download className="size-4" />
-                下载 Windows 安装包（{active.version}）
-              </Button>
-              {!active.macos && !active.linux && (
-                <p className="text-xs text-muted-foreground">
-                  macOS / Linux 版本尚未提供，敬请期待
-                </p>
-              )}
-            </div>
-          ) : (
-            <div className="mt-6 rounded-xl border border-border/30 p-4 text-center text-sm text-muted-foreground">
-              此渠道暂未提供安装包
+          {/* 下载源切换 */}
+          {isGithub && hasAnyDownload && (
+            <div className="mt-6 flex items-center gap-2 flex-wrap">
+              <span className="text-xs text-muted-foreground">下载源</span>
+              {DOWNLOAD_SOURCES.map((s) => (
+                <button
+                  key={s.key}
+                  type="button"
+                  onClick={() => setDownloadSource(s.key)}
+                  className={cn(
+                    "rounded-full border px-3 py-1 text-xs transition-colors",
+                    downloadSource === s.key
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  {s.label}
+                </button>
+              ))}
             </div>
           )}
+
+          {/* 平台下载（按钮常驻，无版本则禁用） */}
+          <div className="mt-6">
+            <PlatformDownloadGrid
+              platforms={[
+                {
+                  key: "windows",
+                  label: "Windows",
+                  icon: Monitor,
+                  download: active.windows
+                    ? { name: active.windows.name, url: active.windows.url }
+                    : null,
+                },
+                {
+                  key: "macos",
+                  label: "macOS",
+                  icon: Apple,
+                  download: active.macos
+                    ? { name: active.macos.name, url: active.macos.url }
+                    : null,
+                },
+                {
+                  key: "linux",
+                  label: "Linux",
+                  icon: Terminal,
+                  download: active.linux
+                    ? { name: active.linux.name, url: active.linux.url }
+                    : null,
+                },
+              ]}
+              onDownload={(p) => handlePlatformDownload(p.download?.url)}
+            />
+          </div>
         </div>
 
-        {/* 更新内容 */}
+        {/* 此版本的变更 */}
         {active.releaseNotes && (
           <div className="border-t border-border/50 p-6 md:p-8">
-            <div className="flex items-center gap-2 mb-3">
+            <div className="flex items-center gap-2 mb-4">
               <FileText className="size-5 text-primary" />
               <h3 className="text-lg font-semibold">此版本的变更</h3>
             </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -12,9 +12,6 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import {
-  Monitor,
-  Apple,
-  Terminal,
   Loader2,
   AlertCircle,
   Package,
@@ -24,10 +21,14 @@ import {
   PackageOpen,
   ArrowUpRight,
   FileText,
-  Download,
+  History,
+  Monitor,
+  Apple,
+  Terminal,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ReleaseNotes } from "@/components/release-notes";
+import { PlatformDownloadGrid } from "@/components/platform-download-grid";
 import {
   DOWNLOAD_SOURCES,
   resolveDownloadUrl,
@@ -47,9 +48,25 @@ interface PlatformInfo {
   DownlodeURL: string;
 }
 
+interface AppInfo {
+  windows: PlatformInfo;
+  macos: PlatformInfo;
+  linux: PlatformInfo;
+}
+
 interface AboutVersion {
   about: string;
   "about-list": Record<string, string>;
+}
+
+/** 历史预览版条目（与顶层字段同构，可覆盖到页面上） */
+interface BetaVersionItem {
+  version: string;
+  builddate: string;
+  tag?: string;
+  htmlUrl?: string;
+  releaseNotes?: string;
+  app: AppInfo;
 }
 
 interface BetaData {
@@ -62,19 +79,13 @@ interface BetaData {
   releaseNotes?: string;
   /** GitHub 可达但没有预览版时的标记 */
   noRelease?: boolean;
-  app: {
-    windows: PlatformInfo;
-    macos: PlatformInfo;
-    linux: PlatformInfo;
-  };
+  app: AppInfo;
   aboutversion?: AboutVersion;
+  /** 历史预览版列表（新 -> 旧） */
+  versions?: BetaVersionItem[];
 }
 
-const platforms = [
-  { key: "windows" as const, label: "Windows", icon: Monitor },
-  { key: "macos" as const, label: "macOS", icon: Apple },
-  { key: "linux" as const, label: "Linux", icon: Terminal },
-];
+const PLATFORM_SLOTS = ["windows", "macos", "linux"] as const;
 
 export default function JoinBetaPage() {
   const [data, setData] = useState<BetaData | null>(null);
@@ -83,6 +94,8 @@ export default function JoinBetaPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [activePlatform, setActivePlatform] = useState<PlatformInfo | null>(null);
   const [downloadSource, setDownloadSource] = useState<DownloadSourceKey>("github");
+  /** null = 最新预览版（顶层数据），否则为 data.versions 中的历史版本号 */
+  const [selectedVersion, setSelectedVersion] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/beta-version")
@@ -99,6 +112,25 @@ export default function JoinBetaPage() {
         setLoading(false);
       });
   }, []);
+
+  // 当前展示的版本：选中的历史版本会覆盖顶层字段（保留 source/versions 等）
+  const active = useMemo<BetaData | null>(() => {
+    if (!data) return null;
+    if (selectedVersion) {
+      const item = data.versions?.find((v) => v.version === selectedVersion);
+      if (item) return { ...data, ...item };
+    }
+    return data;
+  }, [data, selectedVersion]);
+
+  const isGithub = active?.source === "github";
+  const hasAnyDownload = !!(
+    active &&
+    PLATFORM_SLOTS.some((k) => active.app[k].DownlodeURL)
+  );
+
+  const formatDate = (d?: string) =>
+    d ? new Date(d).toLocaleDateString("zh-CN") : "未知";
 
   const handleDownload = (platform: PlatformInfo) => {
     if (platform.licence.isNeedAgreat === "true") {
@@ -168,6 +200,8 @@ export default function JoinBetaPage() {
     );
   }
 
+  if (!active) return null;
+
   return (
     <div className="flex flex-col w-full h-full gap-10 pb-24">
       {/* Header */}
@@ -182,15 +216,15 @@ export default function JoinBetaPage() {
           参与 Koring Launcher 的 Beta 测试计划，抢先体验最新功能
         </p>
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-          {data.source === "github" ? (
+          {isGithub ? (
             <>
               <span className="flex items-center gap-1">
                 <GitBranch className="size-3" />
                 版本信息由 GitHub Releases 自动识别
               </span>
-              {data.htmlUrl && (
+              {active.htmlUrl && (
                 <a
-                  href={data.htmlUrl}
+                  href={active.htmlUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-1 text-primary underline underline-offset-3 hover:text-primary/80"
@@ -217,12 +251,12 @@ export default function JoinBetaPage() {
           </div>
           <div>
             <p className="text-xs text-muted-foreground">版本号</p>
-            <p className="font-semibold text-lg">{data.version}</p>
+            <p className="font-semibold text-lg">{active.version}</p>
           </div>
         </div>
         <div className="flex items-center gap-3">
           <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-primary/10">
-            {data.source === "github" ? (
+            {isGithub ? (
               <Calendar className="size-5 text-primary" />
             ) : (
               <Hash className="size-5 text-primary" />
@@ -230,93 +264,97 @@ export default function JoinBetaPage() {
           </div>
           <div>
             <p className="text-xs text-muted-foreground">
-              {data.source === "github" ? "发布时间" : "编译号"}
+              {isGithub ? "发布时间" : "编译号"}
             </p>
             <p className="font-semibold text-lg">
-              {data.source === "github"
-                ? data.builddate
-                  ? new Date(data.builddate).toLocaleDateString("zh-CN")
-                  : "未知"
-                : data.builddate}
+              {isGithub ? formatDate(active.builddate) : active.builddate}
             </p>
           </div>
         </div>
       </div>
 
+      {/* 历史版本选择 */}
+      {data.versions && data.versions.length > 0 && (
+        <label className="flex items-center gap-2 text-sm text-muted-foreground">
+          <History className="size-4 shrink-0" />
+          <span className="shrink-0">选择版本</span>
+          <select
+            value={selectedVersion ?? ""}
+            onChange={(e) => setSelectedVersion(e.target.value || null)}
+            className="max-w-[16rem] rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-primary"
+          >
+            <option value="">最新版本 {data.version}</option>
+            {data.versions.map((v) => (
+              <option key={v.version} value={v.version}>
+                {v.version}
+                {" · "}
+                {formatDate(v.builddate)}
+              </option>
+            ))}
+          </select>
+        </label>
+      )}
+
       {/* Platform Cards */}
       <div>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
           <h2 className="text-xl font-semibold">选择平台</h2>
-          {data.source === "github" &&
-            platforms.some(({ key }) => !!data.app[key].DownlodeURL) && (
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-xs text-muted-foreground">下载源</span>
-                {DOWNLOAD_SOURCES.map((s) => (
-                  <button
-                    key={s.key}
-                    type="button"
-                    onClick={() => setDownloadSource(s.key)}
-                    className={cn(
-                      "rounded-full border px-3 py-1 text-xs transition-colors",
-                      downloadSource === s.key
-                        ? "border-primary bg-primary/10 text-primary"
-                        : "border-border text-muted-foreground hover:text-foreground"
-                    )}
-                  >
-                    {s.label}
-                  </button>
-                ))}
-              </div>
-            )}
+          {isGithub && hasAnyDownload && (
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-xs text-muted-foreground">下载源</span>
+              {DOWNLOAD_SOURCES.map((s) => (
+                <button
+                  key={s.key}
+                  type="button"
+                  onClick={() => setDownloadSource(s.key)}
+                  className={cn(
+                    "rounded-full border px-3 py-1 text-xs transition-colors",
+                    downloadSource === s.key
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  {s.label}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {platforms.map(({ key, label, icon: Icon }) => {
-            const platform = data.app[key];
-            const noVersion = platform.isNoVersion === "true";
-
-            return (
-              <div
-                key={key}
-                className={cn(
-                  "rounded-2xl border p-6 flex flex-col gap-4 transition-all duration-300",
-                  noVersion
-                    ? "border-border/30 opacity-60"
-                    : "border-border/50 bg-background/60 backdrop-blur-xl hover:scale-[1.02]"
-                )}
-              >
-                <div className="flex items-center gap-3">
-                  <div
-                    className={cn(
-                      "flex items-center justify-center w-10 h-10 rounded-xl",
-                      noVersion ? "bg-muted" : "bg-primary/10"
-                    )}
-                  >
-                    <Icon
-                      className={cn(
-                        "size-5",
-                        noVersion ? "text-muted-foreground" : "text-primary"
-                      )}
-                    />
-                  </div>
-                  <span className="font-semibold text-lg">{label}</span>
-                </div>
-                {noVersion ? (
-                  <p className="text-sm text-muted-foreground">
-                    未提供对应版本
-                  </p>
-                ) : (
-                  <Button
-                    className="w-full mt-auto"
-                    onClick={() => handleDownload(platform)}
-                  >
-                    <Download className="size-4" />
-                    下载
-                  </Button>
-                )}
-              </div>
-            );
-          })}
-        </div>
+        <PlatformDownloadGrid
+          platforms={[
+            {
+              key: "windows",
+              label: "Windows",
+              icon: Monitor,
+              download: active.app.windows.DownlodeURL
+                ? { url: active.app.windows.DownlodeURL }
+                : null,
+              hint: "未提供对应版本",
+            },
+            {
+              key: "macos",
+              label: "macOS",
+              icon: Apple,
+              download: active.app.macos.DownlodeURL
+                ? { url: active.app.macos.DownlodeURL }
+                : null,
+              hint: "未提供对应版本",
+            },
+            {
+              key: "linux",
+              label: "Linux",
+              icon: Terminal,
+              download: active.app.linux.DownlodeURL
+                ? { url: active.app.linux.DownlodeURL }
+                : null,
+              hint: "未提供对应版本",
+            },
+          ]}
+          onDownload={(slot) => {
+            const info = active.app[slot.key as keyof AppInfo];
+            if (info?.DownlodeURL) handleDownload(info);
+          }}
+        />
       </div>
 
       {/* Release Notes / About This Version */}
@@ -324,18 +362,18 @@ export default function JoinBetaPage() {
         <div className="flex items-center gap-2 mb-4">
           <FileText className="size-5 text-primary" />
           <h2 className="text-xl font-semibold">
-            {data.releaseNotes ? "版本更新内容" : "关于此版本"}
+            {active.releaseNotes ? "版本更新内容" : "关于此版本"}
           </h2>
         </div>
-        {data.releaseNotes ? (
-          <ReleaseNotes text={data.releaseNotes} />
-        ) : data.aboutversion ? (
+        {active.releaseNotes ? (
+          <ReleaseNotes text={active.releaseNotes} />
+        ) : active.aboutversion ? (
           <>
             <p className="text-muted-foreground leading-relaxed mb-4">
-              {data.aboutversion.about}
+              {active.aboutversion.about}
             </p>
             <ul className="flex flex-col gap-2">
-              {Object.entries(data.aboutversion["about-list"]).map(
+              {Object.entries(active.aboutversion["about-list"]).map(
                 ([key, text]) => (
                   <li key={key} className="flex items-start gap-2 text-sm">
                     <span className="mt-1.5 size-1.5 rounded-full bg-primary shrink-0" />

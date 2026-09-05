@@ -20,8 +20,28 @@ const GH_HEADERS: Record<string, string> = {
   "X-GitHub-Api-Version": "2022-11-28",
 };
 
-/** 预览版 tag 形态：v1.2.5-beta.16 */
-export const BETA_TAG = /^v?\d+\.\d+\.\d+-beta\.\d+$/i;
+/**
+ * 预览版 tag 形态（兼容两代方案）：
+ *   v1.2.5-beta.16 （旧，-beta.N 尾号）
+ *   v1.2.6-29.beta（新，-N.beta 尾号）
+ */
+export const BETA_TAG =
+  /^v?\d+\.\d+\.\d+(-beta\.\d+|-\d+\.beta)$/i;
+
+/** 判断 tag 是否为预览版（不要求整串匹配，供 history 等筛选使用） */
+export function isBetaTag(tag: string) {
+  return /(-beta\.\d+|-\d+\.beta)$/i.test(String(tag || ""));
+}
+
+/** 判断 release 是否为预览版：优先 prerelease 标记，其次按 tag 形态 */
+export function isBetaRelease(release: any) {
+  return !!(
+    release &&
+    !release.draft &&
+    (release.prerelease === true ||
+      isBetaTag(String(release.tag_name || "")))
+  );
+}
 
 interface FetchResult {
   ok: boolean;
@@ -80,14 +100,9 @@ function byPublishedDesc(a: any, b: any) {
   return tb.localeCompare(ta);
 }
 
-/** 最新预览版 release（prerelease 标记或 -beta.N tag） */
+/** 最新预览版 release（prerelease 标记或预览 tag） */
 export function pickBetaRelease(releases: any[]) {
-  const betas = (releases || []).filter(
-    (r) =>
-      r &&
-      !r.draft &&
-      (r.prerelease === true || BETA_TAG.test(String(r.tag_name || "")))
-  );
+  const betas = (releases || []).filter((r) => isBetaRelease(r));
   betas.sort(byPublishedDesc);
   return betas[0] || null;
 }
