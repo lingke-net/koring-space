@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -25,7 +26,9 @@ import { PlatformDownloadGrid } from "@/components/platform-download-grid";
 import {
   DOWNLOAD_SOURCES,
   resolveDownloadUrl,
+  buildDownloadThanksUrl,
   type DownloadSourceKey,
+  type DownloadOsKey,
 } from "@/lib/download-sources";
 
 interface ChannelPlatform {
@@ -64,6 +67,7 @@ type Selection =
   | { kind: "version"; version: string };
 
 export default function DownloadPage() {
+  const router = useRouter();
   const [data, setData] = useState<DownloadData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -136,9 +140,26 @@ export default function DownloadPage() {
     }
   };
 
-  const handlePlatformDownload = (url?: string | null) => {
-    if (!url) return;
-    window.open(resolveDownloadUrl(downloadSource, url), "_blank");
+  /** 点击下载 -> 跳转感谢下载页（携带 链接/平台/SHA512/加速类型），由该页自动下载 */
+  const startThanksDownload = (os: DownloadOsKey) => {
+    const info = (
+      {
+        windows: active?.windows,
+        macos: active?.macos,
+        linux: active?.linux,
+      } as const
+    )[os];
+    if (!info?.url) return;
+    router.push(
+      buildDownloadThanksUrl({
+        url: resolveDownloadUrl(downloadSource, info.url),
+        os,
+        source: downloadSource,
+        sha512: info.sha512,
+        name: info.name,
+        version: active?.version,
+      })
+    );
   };
 
   if (loading) {
@@ -394,7 +415,9 @@ export default function DownloadPage() {
                     : null,
                 },
               ]}
-              onDownload={(p) => handlePlatformDownload(p.download?.url)}
+              onDownload={(p) =>
+                startThanksDownload(p.key as DownloadOsKey)
+              }
             />
           </div>
         </div>

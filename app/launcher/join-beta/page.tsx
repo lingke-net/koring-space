@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -32,7 +33,9 @@ import { PlatformDownloadGrid } from "@/components/platform-download-grid";
 import {
   DOWNLOAD_SOURCES,
   resolveDownloadUrl,
+  buildDownloadThanksUrl,
   type DownloadSourceKey,
+  type DownloadOsKey,
 } from "@/lib/download-sources";
 
 interface License {
@@ -88,11 +91,13 @@ interface BetaData {
 const PLATFORM_SLOTS = ["windows", "macos", "linux"] as const;
 
 export default function JoinBetaPage() {
+  const router = useRouter();
   const [data, setData] = useState<BetaData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [activePlatform, setActivePlatform] = useState<PlatformInfo | null>(null);
+  const [pendingOs, setPendingOs] = useState<DownloadOsKey>("windows");
   const [downloadSource, setDownloadSource] = useState<DownloadSourceKey>("github");
   /** null = 最新预览版（顶层数据），否则为 data.versions 中的历史版本号 */
   const [selectedVersion, setSelectedVersion] = useState<string | null>(null);
@@ -132,23 +137,35 @@ export default function JoinBetaPage() {
   const formatDate = (d?: string) =>
     d ? new Date(d).toLocaleDateString("zh-CN") : "未知";
 
-  const handleDownload = (platform: PlatformInfo) => {
+  /** 跳转感谢下载页（携带 链接/平台/SHA512/加速类型），由该页自动下载 */
+  const goThanks = (url: string, os: DownloadOsKey) => {
+    router.push(
+      buildDownloadThanksUrl({
+        url,
+        os,
+        source: downloadSource,
+        version: active?.version,
+      })
+    );
+  };
+
+  const handleDownload = (platform: PlatformInfo, os: DownloadOsKey) => {
+    if (!platform.DownlodeURL) return;
+    const url = resolveDownloadUrl(downloadSource, platform.DownlodeURL);
     if (platform.licence.isNeedAgreat === "true") {
       setActivePlatform(platform);
+      setPendingOs(os);
       setDialogOpen(true);
     } else {
-      window.open(
-        resolveDownloadUrl(downloadSource, platform.DownlodeURL),
-        "_blank"
-      );
+      goThanks(url, os);
     }
   };
 
   const confirmDownload = () => {
     if (activePlatform?.DownlodeURL) {
-      window.open(
+      goThanks(
         resolveDownloadUrl(downloadSource, activePlatform.DownlodeURL),
-        "_blank"
+        pendingOs
       );
     }
     setDialogOpen(false);
@@ -352,7 +369,7 @@ export default function JoinBetaPage() {
           ]}
           onDownload={(slot) => {
             const info = active.app[slot.key as keyof AppInfo];
-            if (info?.DownlodeURL) handleDownload(info);
+            if (info?.DownlodeURL) handleDownload(info, slot.key as DownloadOsKey);
           }}
         />
       </div>
