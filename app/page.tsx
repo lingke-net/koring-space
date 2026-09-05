@@ -71,7 +71,7 @@ export default function HomePage() {
               <MarqueeItem className="w-32">Play服务</MarqueeItem>
               <MarqueeItem className="w-32">木柴.空间</MarqueeItem>
               <MarqueeItem className="w-32">SkinEditer</MarqueeItem>
-              <MarqueeItem className="w-32">创绘基金</MarqueeItem>
+              <MarqueeItem className="w-32">创汇基金</MarqueeItem>
             </MarqueeContent>
           </Marquee>
         </div>

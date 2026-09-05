@@ -165,7 +165,7 @@ export function ThanksView() {
                 重新下载
               </Button>
               <Button variant="outline" size="lg" asChild>
-                <Link href="/download">
+                <Link href="/launcher/download">
                   返回下载中心
                   <ArrowRight className="size-4" />
                 </Link>
@@ -185,7 +185,7 @@ export function ThanksView() {
             </p>
             <div className="mt-7">
               <Button variant="outline" size="lg" asChild>
-                <Link href="/download">
+                <Link href="/launcher/download">
                   返回下载中心
                   <ArrowRight className="size-4" />
                 </Link>

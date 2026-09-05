@@ -1,7 +1,7 @@
 import { FlickeringGrid } from "@/components/ui/flickering-grid";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { HammerIcon, ArrowUpRight, Rocket, Layers, Palette, Users, Cpu, Shield } from "lucide-react";
+import { HammerIcon, ArrowUpRight, Download, Rocket, Layers, Palette, Users, Cpu, Shield } from "lucide-react";
 import Link from "next/link";
 
 const features = [
@@ -71,14 +71,20 @@ export default function LauncherPage() {
             Koring Launcher 是一款面向国际版 Minecraft 的现代化启动器，
             提供流畅的版本管理、多账户支持与丰富的个性化选项。
           </p>
-          <div className="flex items-center gap-3 pt-2">
+          <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
             <Button size="lg" asChild>
+              <Link href="/launcher/download">
+                <Download className="size-4" />
+                立即下载
+              </Link>
+            </Button>
+            <Button variant="outline" size="lg" asChild>
               <Link href="https://github.com/lingke-net" target="_blank">
                 前往 GitHub
                 <ArrowUpRight className="size-4" />
               </Link>
             </Button>
-            <Button variant="outline" size="lg" asChild>
+            <Button variant="ghost" size="lg" asChild>
               <Link href="/launcher/join-beta">
                 获取测试版
               </Link>

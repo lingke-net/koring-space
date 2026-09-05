@@ -13,7 +13,7 @@ const navItems = [
     textColor: "#fff",
     links: [
       { label: "Koring Launcher", href: "/launcher", ariaLabel: "Koring Launcher" },
-      { label: "下载中心", href: "/download", ariaLabel: "下载中心" },
+      { label: "下载中心", href: "/launcher/download", ariaLabel: "下载中心" },
       { label: "Sanshe Play", href: "https://docs.play.lenjing.work", ariaLabel: "Sanshe Play" },
     ],
   },
