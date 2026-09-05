@@ -1,11 +1,15 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { SITE_BUILD_LABEL, SITE_VERSION } from "@/lib/site-build";
 
 function Footer() {
   return (
     <>
       <div className="px-4 py-4 text-center text-sm text-muted-foreground">
         &copy; {new Date().getFullYear()} Koring Team. All rights reserved.  |  棱镜视界，创造超越想象的视界
+      </div>
+      <div className="px-4 pb-4 text-center text-xs text-muted-foreground/70">
+        本站版本 v{SITE_VERSION} · 编译于 {SITE_BUILD_LABEL}（UTC+8）
       </div>
       <div className="px-4 py-4 text-center text-sm text-muted-foreground">
         Koring Launcher 是一个非官方的 Minecraft 启动器，与 Mojang Studios、Microsoft 或他们位于中国大陆的代理公司之间并无任何从属或关联。
