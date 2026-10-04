@@ -41,7 +41,6 @@ function Header() {
     <CardNav
       logoAlt="Koring Team"
       items={navItems}
-      baseColor="#ffffff"
       menuColor="#000"
       buttonBgColor="#111"
       buttonTextColor="#fff"

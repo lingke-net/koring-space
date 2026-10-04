@@ -1,10 +1,9 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/layout/header";
 import { Footer } from "@/layout/footer";
-import Script from "next/script";
 import { cn } from "@/lib/utils";
 import { Providers } from "./providers";
 import { PageTransition } from "@/components/page-transition";
@@ -27,6 +26,16 @@ export const metadata: Metadata = {
   },
 };
 
+export const viewport: Viewport = {
+  colorScheme: "light dark",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#1a1a1a" },
+  ],
+  width: "device-width",
+  initialScale: 1,
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -34,11 +43,11 @@ export default function RootLayout({
 }>) {
   return (
     <html
-        lang="en"
+        lang="zh-CN"
         suppressHydrationWarning
         className={cn("h-full", "antialiased", alimamaFangYuan.variable, geistMono.variable, "font-sans")}
     >
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-full flex flex-col bg-background text-foreground">
         <Providers>
         <Header />
         <div style={{ height: 90 }} />
