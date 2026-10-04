@@ -216,7 +216,21 @@ const CardNav: React.FC<CardNavProps> = ({
             </Link>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 h-full">
+            {!isMobile && (
+              <a
+                href="https://account.koring.space"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="card-nav-cta-button"
+                style={{
+                  backgroundColor: buttonBgColor,
+                  color: buttonTextColor,
+                }}
+              >
+                Koring 账户
+              </a>
+            )}
             {!isMobile && (
               <button
                 type="button"
