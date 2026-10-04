@@ -92,67 +92,61 @@ export default function HomePage() {
             </div>
           </a>
 
-          <a
-            className="group rounded-md border border-border p-4 sm:p-6"
-          >
+          <div className="group rounded-md border border-border p-4 sm:p-6">
             <div className="flex items-center justify-between gap-4">
               <b>科灵启动器</b>
               <Status status="maintenance">
                 <StatusIndicator />
                 UI 预览版
               </Status>
-              {/*<ArrowUpRight className="size-4 -translate-x-2 translate-y-2 opacity-0 transition-all group-hover:translate-x-0 group-hover:translate-y-0 group-hover:opacity-100" />*/}
             </div>
             <div className="mt-4">
               <h3 className="mb-1 font-semibold">Koring Launcher</h3>
               <p className="text-sm text-muted-foreground">基于 electron 的 Minecraft 启动器</p>
             </div>
-          </a>
+          </div>
 
-          <a className="group rounded-md border border-border p-4 sm:p-6">
+          <div className="group rounded-md border border-border p-4 sm:p-6">
             <div className="flex items-center justify-between gap-4">
               <b>科灵潘途锐界面组件库</b>
               <Status status="degraded">
                 <StatusIndicator />
                 开发中
               </Status>
-              {/*<ArrowUpRight className="size-4 -translate-x-2 translate-y-2 opacity-0 transition-all group-hover:translate-x-0 group-hover:translate-y-0 group-hover:opacity-100" />*/}
             </div>
             <div className="mt-4">
               <h3 className="mb-1 font-semibold">Koring Pantoray UI</h3>
               <p className="text-sm text-muted-foreground">基于 Next.js 的 UI 组件库</p>
             </div>
-          </a>
+          </div>
 
-          <a className="group rounded-md border border-border p-4 sm:p-6">
+          <div className="group rounded-md border border-border p-4 sm:p-6">
             <div className="flex items-center justify-between gap-4">
               <b>绘皮编辑器</b>
               <Status status="degraded">
                 <StatusIndicator />
                 封测中
               </Status>
-              {/*<ArrowUpRight className="size-4 -translate-x-2 translate-y-2 opacity-0 transition-all group-hover:translate-x-0 group-hover:translate-y-0 group-hover:opacity-100" />*/}
             </div>
             <div className="mt-4">
               <h3 className="mb-1 font-semibold">SkinEditer</h3>
               <p className="text-sm text-muted-foreground">基于 Tauri 的 Minecraft 皮肤编辑器</p>
             </div>
-          </a>
+          </div>
 
-          <a className="group rounded-md border border-border p-4 sm:p-6">
+          <div className="group rounded-md border border-border p-4 sm:p-6">
             <div className="flex items-center justify-between gap-4">
               <b>创汇基金</b>
               <Status status="degraded">
                 <StatusIndicator />
                 邀请制
               </Status>
-              {/*<ArrowUpRight className="size-4 -translate-x-2 translate-y-2 opacity-0 transition-all group-hover:translate-x-0 group-hover:translate-y-0 group-hover:opacity-100" />*/}
             </div>
             <div className="mt-4">
               <h3 className="mb-1 font-semibold">Koring Foreign Exchange Fund</h3>
               <p className="text-sm text-muted-foreground">100万 RMB 的创造力奖励基金</p>
             </div>
-          </a>
+          </div>
 
           <a
             href="https://mchine.space"
