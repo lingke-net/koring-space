@@ -29,12 +29,6 @@ function Footer() {
           </Button>
         </Link>
         <div className="flex items-center gap-1 flex-wrap">
-          <a href="https://community.koring.space/" target="_blank">
-            <Button className="text-xs md:text-sm" variant="ghost">Koring Community</Button>
-          </a>
-          <a href="https://status.koring.space" target="_blank">
-            <Button className="text-xs md:text-sm" variant="ghost">Koring Status</Button>
-          </a>
           <a href="mailto:hi@lenjing.email?subject=联系支持" target="_blank">
             <Button className="text-xs md:text-sm" variant="ghost">HI@lenjing.email</Button>
           </a>
