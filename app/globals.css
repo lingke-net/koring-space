@@ -16,6 +16,17 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@font-face {
+  font-family: 'Alimama FangYuanTi VF-SemiBold-Square';
+  src: url('/font/Alimama.ttf') format('truetype');
+  font-weight: 500;
+  font-stretch: condensed;
+  font-display: swap;
+  font-style: normal;
+  /* 可变字体参数：Bevel 轴设为 0（未指定的轴仍由 font-weight 等标准属性控制） */
+  font-variation-settings: "BEVL" 0;
+}
+
 @theme {
   --animate-warning-scroll: warning-scroll 1.5s linear infinite;
   @keyframes warning-scroll {
@@ -27,7 +38,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
+  --font-sans: 'Alimama FangYuanTi VF-SemiBold-Square', 'Inter Variable', sans-serif;
   --font-heading: var(--font-sans);
   --font-mono: var(--font-geist-mono);
   --color-sidebar-ring: var(--sidebar-ring);
@@ -83,6 +94,7 @@
 }
 
 :root {
+  color-scheme: light;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -118,6 +130,7 @@
 }
 
 .dark {
+  color-scheme: dark;
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.205 0 0);

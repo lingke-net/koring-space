@@ -19,8 +19,6 @@ const navItems = [
     textColor: "#fff",
     links: [
       { label: "Github", href: "https://github.com/lingke-net", ariaLabel: "Github" },
-      { label: "Koring Community", href: "https://community.koring.space/", ariaLabel: "Koring Community" },
-      { label: "Koring Status", href: "https://status.koring.space", ariaLabel: "Koring Status" },
       { label: "支持", href: "https://support.lingke.ink", ariaLabel: "支持" },
     ],
   },
