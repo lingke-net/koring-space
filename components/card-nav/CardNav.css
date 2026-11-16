@@ -11,6 +11,26 @@
   pointer-events: none;
 }
 
+.card-nav-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  pointer-events: auto;
+  z-index: 0;
+  animation: card-nav-backdrop-in 0.25s ease;
+}
+
+@keyframes card-nav-backdrop-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 .card-nav {
   display: block;
   width: 100%;
@@ -25,6 +45,7 @@
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   position: relative;
   pointer-events: auto;
+  z-index: 1;
 }
 
 .card-nav-top {

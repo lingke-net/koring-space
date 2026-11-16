@@ -1,6 +1,6 @@
 "use client";
 
-import { useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { gsap } from "gsap";
 import { GoArrowUpRight } from "react-icons/go";
@@ -157,6 +157,26 @@ const CardNav: React.FC<CardNavProps> = ({
     }
   };
 
+  const closeMenu = () => {
+    const tl = tlRef.current;
+    if (tl) {
+      tl.eventCallback("onReverseComplete", () => setIsExpanded(false));
+      tl.reverse();
+    } else {
+      setIsExpanded(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!isExpanded) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") closeMenu();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isExpanded]);
+
   // 主题切换：system → dark → light → system，默认跟随系统
   const cycleTheme = () => {
     if (theme === "system") setTheme("dark");
@@ -174,6 +194,9 @@ const CardNav: React.FC<CardNavProps> = ({
 
   return (
     <div className={`card-nav-container ${className}`}>
+      {isExpanded && (
+        <div className="card-nav-backdrop" onClick={closeMenu} aria-hidden="true" />
+      )}
       <nav
         ref={navRef}
         className={`card-nav ${isExpanded ? "open" : ""}`}
@@ -268,6 +291,7 @@ const CardNav: React.FC<CardNavProps> = ({
                       className="nav-card-link"
                       href={lnk.href}
                       aria-label={lnk.ariaLabel}
+                      onClick={closeMenu}
                     >
                       <GoArrowUpRight className="nav-card-link-icon" aria-hidden="true" />
                       {lnk.label}
@@ -280,6 +304,7 @@ const CardNav: React.FC<CardNavProps> = ({
                       target={lnk.href?.startsWith("http") ? "_blank" : undefined}
                       rel={lnk.href?.startsWith("http") ? "noopener noreferrer" : undefined}
                       aria-label={lnk.ariaLabel}
+                      onClick={closeMenu}
                     >
                       <GoArrowUpRight className="nav-card-link-icon" aria-hidden="true" />
                       {lnk.label}
