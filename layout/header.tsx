@@ -1,10 +1,6 @@
 "use client";
 
-import dynamic from "next/dynamic";
-
-const CardNav = dynamic(() => import("@/components/card-nav/CardNav"), {
-  ssr: false,
-});
+import CardNav from "@/components/card-nav/CardNav";
 
 const navItems = [
   {

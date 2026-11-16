@@ -11,6 +11,7 @@ import { PageTransition } from "@/components/page-transition";
 const alimamaFangYuan = localFont({
   src: "../public/font/Alimama.ttf",
   variable: "--font-sans",
+  display: "swap",
 });
 
 const geistMono = Geist_Mono({
