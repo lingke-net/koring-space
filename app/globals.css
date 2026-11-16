@@ -28,6 +28,12 @@
 }
 
 @theme {
+  /* 动效基线 — 苹果式 spring / iOS 曲线 */
+  --ease-ios: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-spring-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+
   --animate-warning-scroll: warning-scroll 1.5s linear infinite;
   @keyframes warning-scroll {
     from { background-position: 0 0; }
@@ -162,5 +168,54 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+}
+
+/* ============================================
+   View Transitions — 全局页面切换动效
+   旧页淡出缩小（220ms），新页延迟 60ms 淡入放大（360ms）
+   同层级路由不做位移，保持克制的苹果式过渡
+   ============================================ */
+.page-content {
+  view-transition-name: content;
+}
+
+/* root 转场禁用，只让内容区参与动画（顶栏/页脚保持稳定） */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+}
+
+/* 内容区默认不参与动画，仅整页路由转场时播放 */
+::view-transition-old(content),
+::view-transition-new(content) {
+  animation: none;
+}
+
+:root[data-vt-scope="route"]::view-transition-old(content) {
+  animation: 220ms ease-in both page-out-sibling;
+  pointer-events: none;
+}
+:root[data-vt-scope="route"]::view-transition-new(content) {
+  animation: 360ms cubic-bezier(0.22, 1, 0.36, 1) 60ms both page-in-sibling;
+  pointer-events: auto;
+}
+
+@keyframes page-out-sibling {
+  from { opacity: 1; transform: scale(1); }
+  to   { opacity: 0; transform: scale(0.97); }
+}
+@keyframes page-in-sibling {
+  from { opacity: 0; transform: scale(0.975); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* 系统级减少动画：直接禁用转场动画 */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root),
+  ::view-transition-old(content),
+  ::view-transition-new(content) {
+    animation: none !important;
+  }
 }
 

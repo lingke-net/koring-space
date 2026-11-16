@@ -45,6 +45,7 @@ export default function RootLayout({
   return (
     <html
         lang="zh-CN"
+        data-vt-scope="route"
         suppressHydrationWarning
         className={cn("h-full", "antialiased", alimamaFangYuan.variable, geistMono.variable, "font-sans")}
     >
