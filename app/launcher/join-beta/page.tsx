@@ -220,188 +220,168 @@ export default function JoinBetaPage() {
   if (!active) return null;
 
   return (
-    <div className="flex flex-col w-full h-full gap-10 pb-24">
-      {/* Header */}
-      <div className="flex flex-col gap-2">
-        <Badge variant="outline" className="w-fit">
-          加入 Beta 测试
-        </Badge>
-        <h1 className="text-3xl md:text-5xl font-bold tracking-tight">
-          Koring Launcher
-        </h1>
-        <p className="text-muted-foreground text-base md:text-lg max-w-xl">
-          参与 Koring Launcher 的 Beta 测试计划，抢先体验最新功能
+    <div className="pb-24">
+      {/* Hero */}
+      <section className="pt-14 md:pt-20 pb-12">
+        <p className="font-mono text-xs tracking-[0.2em] text-muted-foreground uppercase">
+          Beta 测试 · Koring Launcher
         </p>
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-          {isGithub ? (
-            <>
-              <span className="flex items-center gap-1">
-                <GitBranch className="size-3" />
-                版本信息由 GitHub Releases 自动识别
-              </span>
-              {active.htmlUrl && (
+        <h1 className="mt-6 text-4xl md:text-6xl font-bold tracking-tight">
+          抢先体验 Koring Launcher
+        </h1>
+        <p className="mt-6 max-w-xl text-base md:text-lg leading-relaxed text-muted-foreground">
+          参与 Beta 测试计划，抢先体验最新功能，帮助我们把启动器做得更好。
+        </p>
+        {isGithub && (
+          <p className="mt-4 font-mono text-xs text-muted-foreground">
+            版本信息由 GitHub Releases 自动识别
+            {active.htmlUrl && (
+              <>
+                {" · "}
                 <a
                   href={active.htmlUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-1 text-primary underline underline-offset-3 hover:text-primary/80"
+                  className="underline underline-offset-4 decoration-border hover:decoration-foreground transition-colors"
                 >
-                  在 GitHub 查看发布页
-                  <ArrowUpRight className="size-3" />
+                  GitHub 发布页
                 </a>
-              )}
-            </>
-          ) : (
-            <span className="flex items-center gap-1">
-              <GitBranch className="size-3" />
-              版本信息来自缓存数据源
-            </span>
-          )}
-        </div>
-      </div>
-
-      {/* Version Info Card */}
-      <div className="rounded-2xl border border-border/50 p-6 bg-background/60 backdrop-blur-xl flex flex-col sm:flex-row gap-6">
-        <div className="flex items-center gap-3">
-          <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-primary/10">
-            <Package className="size-5 text-primary" />
-          </div>
-          <div>
-            <p className="text-xs text-muted-foreground">版本号</p>
-            <p className="font-semibold text-lg">{active.version}</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-3">
-          <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-primary/10">
-            {isGithub ? (
-              <Calendar className="size-5 text-primary" />
-            ) : (
-              <Hash className="size-5 text-primary" />
+              </>
             )}
+          </p>
+        )}
+      </section>
+
+      {/* 版本信息 — 编辑式，无卡片 */}
+      <section className="border-t border-border py-10">
+        <div className="flex flex-wrap items-baseline justify-between gap-3">
+          <div className="flex items-baseline gap-3">
+            <h2 className="text-2xl md:text-3xl font-medium tracking-tight">
+              {active.version}
+            </h2>
+            <span className="font-mono text-xs text-muted-foreground">
+              预览版
+            </span>
           </div>
-          <div>
-            <p className="text-xs text-muted-foreground">
-              {isGithub ? "发布时间" : "编译号"}
-            </p>
-            <p className="font-semibold text-lg">
+          <div className="flex items-center gap-2 flex-wrap text-sm text-muted-foreground">
+            <span className="font-mono">
               {isGithub ? formatDate(active.builddate) : active.builddate}
-            </p>
+            </span>
           </div>
         </div>
-      </div>
 
-      {/* 历史版本选择 */}
-      {data.versions && data.versions.length > 0 && (
-        <label className="flex items-center gap-2 text-sm text-muted-foreground">
-          <History className="size-4 shrink-0" />
-          <span className="shrink-0">选择版本</span>
-          <select
-            value={selectedVersion ?? ""}
-            onChange={(e) => setSelectedVersion(e.target.value || null)}
-            className="max-w-[16rem] rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-primary"
-          >
-            <option value="">最新版本 {data.version}</option>
-            {data.versions.map((v) => (
-              <option key={v.version} value={v.version}>
-                {v.version}
-                {" · "}
-                {formatDate(v.builddate)}
-              </option>
-            ))}
-          </select>
-        </label>
-      )}
-
-      {/* Platform Cards */}
-      <div>
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
-          <h2 className="text-xl font-semibold">选择平台</h2>
-          {isGithub && hasAnyDownload && (
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-xs text-muted-foreground">下载源</span>
-              {DOWNLOAD_SOURCES.map((s) => (
-                <button
-                  key={s.key}
-                  type="button"
-                  onClick={() => setDownloadSource(s.key)}
-                  className={cn(
-                    "rounded-full border px-3 py-1 text-xs transition-colors",
-                    downloadSource === s.key
-                      ? "border-primary bg-primary/10 text-primary"
-                      : "border-border text-muted-foreground hover:text-foreground"
-                  )}
-                >
-                  {s.label}
-                </button>
+        {/* 历史版本选择 */}
+        {data.versions && data.versions.length > 0 && (
+          <label className="mt-8 flex items-center gap-2 text-sm text-muted-foreground">
+            <span className="font-mono text-xs">历史版本</span>
+            <select
+              value={selectedVersion ?? ""}
+              onChange={(e) => setSelectedVersion(e.target.value || null)}
+              className="max-w-[16rem] rounded-full border border-border bg-background px-3 py-1.5 font-mono text-xs text-foreground outline-none transition-colors focus:border-foreground"
+            >
+              <option value="">最新 {data.version}</option>
+              {data.versions.map((v) => (
+                <option key={v.version} value={v.version}>
+                  {v.version} · {formatDate(v.builddate)}
+                </option>
               ))}
-            </div>
-          )}
-        </div>
-        <PlatformDownloadGrid
-          platforms={[
-            {
-              key: "windows",
-              label: "Windows",
-              icon: Monitor,
-              download: active.app.windows.DownlodeURL
-                ? { url: active.app.windows.DownlodeURL }
-                : null,
-              hint: "未提供对应版本",
-            },
-            {
-              key: "macos",
-              label: "macOS",
-              icon: Apple,
-              download: active.app.macos.DownlodeURL
-                ? { url: active.app.macos.DownlodeURL }
-                : null,
-              hint: "未提供对应版本",
-            },
-            {
-              key: "linux",
-              label: "Linux",
-              icon: Terminal,
-              download: active.app.linux.DownlodeURL
-                ? { url: active.app.linux.DownlodeURL }
-                : null,
-              hint: "未提供对应版本",
-            },
-          ]}
-          onDownload={(slot) => {
-            const info = active.app[slot.key as keyof AppInfo];
-            if (info?.DownlodeURL) handleDownload(info, slot.key as DownloadOsKey);
-          }}
-        />
-      </div>
+            </select>
+          </label>
+        )}
 
-      {/* Release Notes / About This Version */}
-      <div className="rounded-2xl border border-border/50 p-6 md:p-8 bg-background/60 backdrop-blur-xl">
-        <div className="flex items-center gap-2 mb-4">
-          <FileText className="size-5 text-primary" />
-          <h2 className="text-xl font-semibold">
-            {active.releaseNotes ? "版本更新内容" : "关于此版本"}
-          </h2>
+        {/* 下载源切换 */}
+        {isGithub && hasAnyDownload && (
+          <div className="mt-8 flex items-center gap-2 flex-wrap">
+            <span className="font-mono text-xs text-muted-foreground">下载源</span>
+            {DOWNLOAD_SOURCES.map((s) => (
+              <button
+                key={s.key}
+                type="button"
+                onClick={() => setDownloadSource(s.key)}
+                className={cn(
+                  "rounded-full border px-3 py-1 text-xs transition-colors",
+                  downloadSource === s.key
+                    ? "border-foreground text-foreground"
+                    : "border-border text-muted-foreground hover:text-foreground"
+                )}
+              >
+                {s.label}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* 平台下载 */}
+        <div className="mt-8">
+          <PlatformDownloadGrid
+            platforms={[
+              {
+                key: "windows",
+                label: "Windows",
+                icon: Monitor,
+                download: active.app.windows.DownlodeURL
+                  ? { url: active.app.windows.DownlodeURL }
+                  : null,
+                hint: "未提供对应版本",
+              },
+              {
+                key: "macos",
+                label: "macOS",
+                icon: Apple,
+                download: active.app.macos.DownlodeURL
+                  ? { url: active.app.macos.DownlodeURL }
+                  : null,
+                hint: "未提供对应版本",
+              },
+              {
+                key: "linux",
+                label: "Linux",
+                icon: Terminal,
+                download: active.app.linux.DownlodeURL
+                  ? { url: active.app.linux.DownlodeURL }
+                  : null,
+                hint: "未提供对应版本",
+              },
+            ]}
+            onDownload={(slot) => {
+              const info = active.app[slot.key as keyof AppInfo];
+              if (info?.DownlodeURL) handleDownload(info, slot.key as DownloadOsKey);
+            }}
+          />
         </div>
-        {active.releaseNotes ? (
-          <ReleaseNotes text={active.releaseNotes} />
-        ) : active.aboutversion ? (
-          <>
-            <p className="text-muted-foreground leading-relaxed mb-4">
-              {active.aboutversion.about}
-            </p>
-            <ul className="flex flex-col gap-2">
-              {Object.entries(active.aboutversion["about-list"]).map(
-                ([key, text]) => (
-                  <li key={key} className="flex items-start gap-2 text-sm">
-                    <span className="mt-1.5 size-1.5 rounded-full bg-primary shrink-0" />
-                    <span className="text-muted-foreground">{text}</span>
-                  </li>
-                )
-              )}
-            </ul>
-          </>
-        ) : null}
-      </div>
+      </section>
+
+      {/* 此版本的更新 */}
+      {(active.releaseNotes || active.aboutversion) && (
+        <section className="border-t border-border py-10">
+          <h3 className="font-mono text-xs tracking-[0.2em] text-muted-foreground uppercase">
+            此版本的更新
+          </h3>
+          <div className="mt-6">
+            {active.releaseNotes ? (
+              <ReleaseNotes text={active.releaseNotes} />
+            ) : active.aboutversion ? (
+              <>
+                <p className="leading-relaxed text-muted-foreground">
+                  {active.aboutversion.about}
+                </p>
+                {Object.keys(active.aboutversion["about-list"] || {}).length > 0 && (
+                  <ul className="mt-4 flex flex-col gap-2">
+                    {Object.entries(active.aboutversion["about-list"]).map(
+                      ([key, text]) => (
+                        <li key={key} className="flex items-start gap-2 text-sm">
+                          <span className="mt-1.5 size-1.5 rounded-full bg-foreground shrink-0" />
+                          <span className="text-muted-foreground">{text}</span>
+                        </li>
+                      )
+                    )}
+                  </ul>
+                )}
+              </>
+            ) : null}
+          </div>
+        </section>
+      )}
 
       {/* License Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
