@@ -1,45 +1,54 @@
 import Link from "next/link";
 import { ArrowUpRight, Plus } from "lucide-react";
 
+/**
+ * Koring Team 作品集
+ * 品牌前缀规则：
+ *   - Koring Launcher / Koring Pantoray UI / Koring Foreign Exchange Fund
+ *     → 已自带 Koring 前缀
+ *   - Sanshe Play / SkinEditer
+ *     → 加 Koring 前缀（Koring Sanshe Play / Koring SkinEditer）
+ *   - MChine Space → 独立运营，不加前缀
+ */
 const projects = [
   {
     name: "Koring Launcher",
     label: "科灵启动器",
-    desc: "基于 Electron 的 Minecraft 启动器",
-    status: "UI 预览版",
+    desc: "基于 Electron 的现代化 Minecraft 启动器",
+    status: "预览版",
     href: "/launcher",
   },
   {
-    name: "Sanshe Play",
-    label: "散射系列",
+    name: "Koring Sanshe Play",
+    label: "科灵散射",
     desc: "Minecraft 综合性一体化设施平台",
     href: "https://docs.play.lenjing.work",
   },
   {
     name: "Koring Pantoray UI",
-    label: "科灵潘途锐界面组件库",
+    label: "科灵潘途锐界面库",
     desc: "基于 Next.js 的 UI 组件库",
     status: "开发中",
     href: "",
   },
   {
-    name: "SkinEditer",
-    label: "绘皮编辑器",
+    name: "Koring SkinEditer",
+    label: "科灵绘皮",
     desc: "基于 Tauri 的 Minecraft 皮肤编辑器",
     status: "封测中",
     href: "",
   },
   {
     name: "Koring Foreign Exchange Fund",
-    label: "创汇基金",
-    desc: "100 万 RMB 的创造力奖励基金",
+    label: "科灵创汇基金",
+    desc: "100 万 RMB 创造力奖励基金",
     status: "邀请制",
     href: "",
   },
   {
     name: "MChine Space",
     label: "木柴.空间",
-    desc: "Minecraft 创作者赞助平台",
+    desc: "Minecraft 创作者赞助平台（独立运营）",
     href: "https://mchine.space",
   },
 ];
@@ -93,7 +102,7 @@ const faqs = [
   },
   {
     q: "什么是创汇基金？",
-    a: "创汇基金是一笔 100 万 RMB 的创造力奖励基金，采用邀请制，用于赋能社区中的优秀创作者。",
+    a: "Koring Foreign Exchange Fund 是一笔 100 万 RMB 的创造力奖励基金，采用邀请制，用于赋能社区中的优秀创作者。",
   },
   {
     q: "如何联系你们？",
